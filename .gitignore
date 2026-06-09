@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#script work artifacts
+*.msg
+*.manifest
+*.pot
+*.po
+*.mo
+*.json
+*.log
+
