@@ -727,4 +727,56 @@ def run_validate(args: argparse.Namespace) -> int:
     if args.manifest:
         manifest_path = Path(args.manifest)
         if not manifest_path.is_file():
-            print
+            print(f"Error: Manifest file '{manifest_path}' does not exist.")
+            return 1
+    else:
+        manifest_path = original_path.with_suffix(".manifest")
+
+    return validate_files(original_path, rebuilt_path, manifest_path)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Acronis .MSG Localization Tool Suite")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # --- СУБКОМАНДА: EXTRACT ---
+    p_extract = subparsers.add_add_parser("extract", help="Розбір бінарного файлу .msg")
+    p_extract.add_argument("input", help="Шлях до оригінального файлу .msg")
+    p_extract.add_argument("--manifest", help="Шлях для збереження JSON-маніфесту")
+    p_extract.add_argument("--pot", help="Шлях для збереження шаблону .pot")
+    p_extract.add_argument("--exclude", help="Шлях до файлу виключень exclude_list.json")
+
+    # --- СУБКОМАНДА: BUILD ---
+    p_build = subparsers.add_parser("build", help="Збірка локалізованого .msg")
+    p_build.add_argument("--manifest", required=True, help="Шлях до JSON-маніфесту структури")
+    p_build.add_argument("--po", help="Шлях до файлу перекладу .po")
+    p_build.add_argument("--output", help="Шлях для збереження вихідного файлу .msg")
+    p_build.add_argument("--force", action="store_true", help="Примусова компіляція неперекладених блоків")
+    p_build.add_argument("--align-all", type=int, default=1, help="Загальне вирівнювання байтів (наприклад, 1 або 4)")
+    p_build.add_argument("--align-masters", type=int, default=1, help="Вирівнювання для великих master-блоків")
+    p_build.add_argument("--inject", action="store_true", help="Режим суворої побітової ін'єкції (Byte-for-Byte)")
+
+    # --- СУБКОМАНДА: VALIDATE ---
+    p_validate = subparsers.add_parser("validate", help="Побітове порівняння двох файлів")
+    p_validate.add_argument("--original", required=True, help="Шлях до оригінального .msg")
+    p_validate.add_argument("--rebuilt", required=True, help="Шлях до зібраного .msg")
+    p_validate.add_argument("--manifest", help="Шлях до маніфесту для глибокого аналізу")
+
+    # --- СУБКОМАНДА: INSPECT ---
+    p_inspect = subparsers.add_parser("inspect", help="Швидка інспекція метаданих файлу")
+    p_inspect.add_argument("input", help="Шлях до файлу .msg")
+
+    args = parser.parse_args()
+
+    if args.command == "extract":
+        sys.exit(run_extract(args))
+    elif args.command == "build":
+        sys.exit(run_build(args))
+    elif args.command == "validate":
+        sys.exit(run_validate(args))
+    elif args.command == "inspect":
+        sys.exit(run_validate(args) if hasattr(args, "original") else inspect_msg(Path(args.input)))
+
+
+if __name__ == "__main__":
+    main()
