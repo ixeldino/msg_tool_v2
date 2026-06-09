@@ -740,7 +740,7 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # --- СУБКОМАНДА: EXTRACT ---
-    p_extract = subparsers.add_add_parser("extract", help="Розбір бінарного файлу .msg")
+    p_extract = subparsers.add_parser("extract", help="Розбір бінарного файлу .msg")
     p_extract.add_argument("input", help="Шлях до оригінального файлу .msg")
     p_extract.add_argument("--manifest", help="Шлях для збереження JSON-маніфесту")
     p_extract.add_argument("--pot", help="Шлях для збереження шаблону .pot")
